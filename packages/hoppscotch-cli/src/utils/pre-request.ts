@@ -24,13 +24,14 @@ import { HoppEnvs } from "../types/request";
 import { PreRequestMetrics } from "../types/response";
 import { isHoppCLIError } from "./checks";
 import { arrayFlatMap, arraySort, tupleToRecord } from "./functions/array";
-import { getEffectiveFinalMetaData, getResolvedVariables } from "./getters";
+import {getEffectiveFinalMetaData, getResolvedVariables} from "./getters";
 import { toFormData } from "./mutators";
 import {
   DigestAuthParams,
   fetchInitialDigestAuthInfo,
   generateDigestAuthHeader,
 } from "./auth/digest";
+import FormData from "form-data";
 
 /**
  * Runs pre-request-script runner over given request which extracts set ENVs and
@@ -292,7 +293,14 @@ export async function getEffectiveRESTRequest(
 
   const effectiveFinalBody = _effectiveFinalBody.right;
 
-  if (
+  if (effectiveFinalBody instanceof FormData) {
+    effectiveFinalHeaders.push({
+      active: true,
+      key: "Content-Type",
+      value: `multipart/form-data; boundary=${effectiveFinalBody.getBoundary()}`,
+      description: "",
+    });
+  } else if (
     request.body.contentType &&
     !effectiveFinalHeaders.some(
       ({ key }) => key.toLowerCase() === "content-type"
@@ -405,35 +413,35 @@ function getFinalBodyFromRequest(
 
   if (request.body.contentType === "multipart/form-data") {
     return pipe(
-      request.body.body,
-      A.filter((x) => x.key !== "" && x.active), // Remove empty keys
+    request.body.body,
+    A.filter((x) => x.key !== "" && x.active), // Remove empty keys
 
-      // Sort files down
-      arraySort((a, b) => {
-        if (a.isFile) return 1;
-        if (b.isFile) return -1;
-        return 0;
-      }),
+    // Sort files down
+    arraySort((a, b) => {
+      if (a.isFile) return 1;
+      if (b.isFile) return -1;
+      return 0;
+    }),
 
-      // FormData allows only a single blob in an entry,
-      // we split array blobs into separate entries (FormData will then join them together during exec)
-      arrayFlatMap((x) =>
-        x.isFile
-          ? x.value.map((v) => ({
-              key: parseTemplateString(x.key, resolvedVariables),
-              value: v as string | Blob,
-            }))
-          : [
-              {
-                key: parseTemplateString(x.key, resolvedVariables),
-                value: parseTemplateString(x.value, resolvedVariables),
-              },
-            ]
+    // FormData allows only a single blob in an entry,
+    // we split array blobs into separate entries (FormData will then join them together during exec)
+    arrayFlatMap((x) =>
+      x.isFile
+        ? x.value.map((v) => ({
+          key: parseTemplateString(x.key, resolvedVariables),
+          value: v as string | Blob,
+        }))
+        : [
+          {
+            key: parseTemplateString(x.key, resolvedVariables),
+            value: parseTemplateString(x.value, resolvedVariables),
+          },
+        ]
       ),
       toFormData,
       E.right
     );
-  }
+    }
 
   return pipe(
     parseBodyEnvVariablesE(request.body.body, resolvedVariables),
