@@ -63,13 +63,11 @@ export const toFormData = (values: FormDataEntry[]) => {
         }),
         key
       );
-
       return;
     }
     const isFilePath = typeof value === "string" && value.startsWith("/");
-    formData.append(key, value);
+    formData.append(key, isFilePath ? fsSync.createReadStream(value) : value);
   });
-
   return formData;
 };
 
