@@ -53,10 +53,23 @@ const getValidRequests = (
  */
 export const toFormData = (values: FormDataEntry[]) => {
   const formData = new FormData();
-  values.forEach(({ key, value }) => {
+
+  values.forEach(({ key, value, contentType }) => {
+    if (contentType) {
+      formData.append(
+        key,
+        new Blob([value], {
+          type: contentType,
+        }),
+        key
+      );
+
+      return;
+    }
     const isFilePath = typeof value === "string" && value.startsWith("/");
-    formData.append(key, isFilePath ? fsSync.createReadStream(value) : value);
+    formData.append(key, value);
   });
+
   return formData;
 };
 

@@ -24,7 +24,7 @@ import { HoppEnvs } from "../types/request";
 import { PreRequestMetrics } from "../types/response";
 import { isHoppCLIError } from "./checks";
 import { arrayFlatMap, arraySort, tupleToRecord } from "./functions/array";
-import {getEffectiveFinalMetaData, getResolvedVariables} from "./getters";
+import { getEffectiveFinalMetaData, getResolvedVariables } from "./getters";
 import { toFormData } from "./mutators";
 import {
   DigestAuthParams,
@@ -413,35 +413,51 @@ function getFinalBodyFromRequest(
 
   if (request.body.contentType === "multipart/form-data") {
     return pipe(
-    request.body.body,
-    A.filter((x) => x.key !== "" && x.active), // Remove empty keys
+      request.body.body,
+      A.filter((x) => x.key !== "" && x.active), // Remove empty keys
 
-    // Sort files down
-    arraySort((a, b) => {
-      if (a.isFile) return 1;
-      if (b.isFile) return -1;
-      return 0;
-    }),
+      // Sort files down
+      arraySort((a, b) => {
+        if (a.isFile) return 1;
+        if (b.isFile) return -1;
+        return 0;
+      }),
 
-    // FormData allows only a single blob in an entry,
-    // we split array blobs into separate entries (FormData will then join them together during exec)
-    arrayFlatMap((x) =>
-      x.isFile
-        ? x.value.map((v) => ({
-          key: parseTemplateString(x.key, resolvedVariables),
-          value: v as string | Blob,
-        }))
-        : [
-          {
-            key: parseTemplateString(x.key, resolvedVariables),
-            value: parseTemplateString(x.value, resolvedVariables),
-          },
-        ]
+      // FormData allows only a single blob in an entry,
+      // we split array blobs into separate entries (FormData will then join them together during exec)
+      arrayFlatMap((x) =>
+        x.isFile
+          ? x.value.map((v) => ({
+              key: parseTemplateString(x.key, resolvedVariables),
+              value: v as string | Blob,
+              contentType: x.contentType,
+            }))
+          : [
+              {
+                key: parseTemplateString(x.key, resolvedVariables),
+                value: parseTemplateString(x.value, resolvedVariables),
+                contentType: x.contentType,
+              },
+            ]
       ),
       toFormData,
       E.right
     );
+  }
+
+  if (request.body.contentType === "application/octet-stream") {
+    const body = request.body.body;
+
+    if (!body) {
+      return E.right(null);
     }
+
+    if (!(body instanceof File)) {
+      return E.right(null);
+    }
+
+    return E.right(body);
+  }
 
   return pipe(
     parseBodyEnvVariablesE(request.body.body, resolvedVariables),
