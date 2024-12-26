@@ -368,7 +368,7 @@ export async function getEffectiveRESTRequest(
 function getFinalBodyFromRequest(
   request: HoppRESTRequest,
   resolvedVariables: EnvironmentVariable[]
-): E.Either<HoppCLIError, string | null | FormData> {
+): E.Either<HoppCLIError, string | null | FormData | File> {
   if (request.body.contentType === null) {
     return E.right(null);
   }
