@@ -90,18 +90,18 @@ jobs:
             libayatana-appindicator3-dev \
             librsvg2-dev
 
-    - name: Setting up Windows Environment and injecting before bundle command (Windows only)
-      if: matrix.platform == 'windows-latest'
-      shell: bash
-      env:
-        WINDOWS_SIGN_COMMAND: trusted-signing-cli -e ${{ secrets.AZURE_ENDPOINT }} -a ${{ secrets.AZURE_CODE_SIGNING_NAME }} -c ${{ secrets.AZURE_CERT_PROFILE_NAME }} %1
-      run: |
-        cd packages/hoppscotch-agent
-        # Inject signing command into main conf.
-        cat './src-tauri/tauri.conf.json' | jq '.bundle .windows += { "signCommand": env.WINDOWS_SIGN_COMMAND}' > './src-tauri/temp.json' && mv './src-tauri/temp.json' './src-tauri/tauri.conf.json'
-        # Inject signing command into portable conf.
-        cat './src-tauri/tauri.portable.conf.json' | jq '.bundle .windows += { "signCommand": env.WINDOWS_SIGN_COMMAND}' > './src-tauri/temp_portable.json' && mv './src-tauri/temp_portable.json' './src-tauri/tauri.portable.conf.json'
-        cargo install trusted-signing-cli@0.3.0
+#    - name: Setting up Windows Environment and injecting before bundle command (Windows only)
+#      if: matrix.platform == 'windows-latest'
+#      shell: bash
+#      env:
+#        WINDOWS_SIGN_COMMAND: trusted-signing-cli -e ${{ secrets.AZURE_ENDPOINT }} -a ${{ secrets.AZURE_CODE_SIGNING_NAME }} -c ${{ secrets.AZURE_CERT_PROFILE_NAME }} %1
+#      run: |
+#        cd packages/hoppscotch-agent
+#        # Inject signing command into main conf.
+#        cat './src-tauri/tauri.conf.json' | jq '.bundle .windows += { "signCommand": env.WINDOWS_SIGN_COMMAND}' > './src-tauri/temp.json' && mv './src-tauri/temp.json' './src-tauri/tauri.conf.json'
+#        # Inject signing command into portable conf.
+#        cat './src-tauri/tauri.portable.conf.json' | jq '.bundle .windows += { "signCommand": env.WINDOWS_SIGN_COMMAND}' > './src-tauri/temp_portable.json' && mv './src-tauri/temp_portable.json' './src-tauri/tauri.portable.conf.json'
+#        cargo install trusted-signing-cli@0.3.0
 
     - name: Set platform-specific variables
       run: |
@@ -117,20 +117,20 @@ jobs:
           echo "target_os_name=mac" >> $GITHUB_ENV
         fi
 
-    - name: Setup macOS code signing
-      if: matrix.platform == 'macos-latest'
-      env:
-        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-        APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      run: |
-        echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
-        security create-keychain -p $KEYCHAIN_PASSWORD build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
-        security import certificate.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
+#    - name: Setup macOS code signing
+#      if: matrix.platform == 'macos-latest'
+#      env:
+#        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+#        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+#        APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+#        KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+#      run: |
+#        echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+#        security create-keychain -p $KEYCHAIN_PASSWORD build.keychain
+#        security default-keychain -s build.keychain
+#        security unlock-keychain -p $KEYCHAIN_PASSWORD build.keychain
+#        security import certificate.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
+#        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k $KEYCHAIN_PASSWORD build.keychain
 
     - name: Cache Rust dependencies
       uses: actions/cache@v3
