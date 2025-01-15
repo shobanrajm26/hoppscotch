@@ -53,4 +53,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: ${{ matrix.args }}
-          projectPath: 'packages/hoppscoth-desktop'
+        run: |
+          cd packages/hoppscotch-desktop
