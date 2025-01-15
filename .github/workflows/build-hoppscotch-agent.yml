@@ -158,6 +158,7 @@ jobs:
       with:
         args: ${{ matrix.args }}
         projectPath: packages/hoppscotch-desktop
+        includeDebug: true
 #    - name: Install dependencies
 #      shell: bash
 #      run: |
