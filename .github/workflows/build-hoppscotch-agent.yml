@@ -1,9 +1,11 @@
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: Tag of the version to build
-        required: true
+  push:
+    branches: [ workflow-analysis ]
+#  workflow_dispatch:
+#    inputs:
+#      version:
+#        description: Tag of the version to build
+#        required: true
 
 env:
   CARGO_TERM_COLOR: always
