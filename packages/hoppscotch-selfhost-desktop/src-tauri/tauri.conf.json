@@ -1,16 +1,18 @@
 {
-  "build": {
-    "beforeDevCommand": "pnpm dev",
-    "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:3000",
-    "distDir": "../dist",
-    "withGlobalTauri": false
-  },
+
   "package": {
     "productName": "Hoppscotch",
     "version": "24.12.0"
   },
   "tauri": {
+    "identifier": "io.hoppscotch.desktop",
+    "build": {
+      "beforeDevCommand": "pnpm dev",
+      "beforeBuildCommand": "pnpm build",
+      "devPath": "http://localhost:3000",
+      "distDir": "../dist",
+      "withGlobalTauri": false
+    },
     "allowlist": {
       "all": false,
       "shell": {

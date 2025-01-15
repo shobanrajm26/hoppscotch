@@ -136,7 +136,6 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          cd packages/hoppscotch-agent
           pnpm install --filter hoppscotch-agent
 
       - name: Build Tauri app (Linux)
