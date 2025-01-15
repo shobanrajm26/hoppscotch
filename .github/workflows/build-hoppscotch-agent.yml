@@ -23,10 +23,10 @@ jobs:
     steps:
     - name: Checkout hoppscotch/hoppscotch
       uses: actions/checkout@v3
-      with:
-        repository: hoppscotch/hoppscotch
-        ref: main
-        token: ${{ secrets.CHECKOUT_GITHUB_TOKEN }}
+#      with:
+#        repository: hoppscotch/hoppscotch
+#        ref: main
+#        token: ${{ secrets.CHECKOUT_GITHUB_TOKEN }}
 
     - name: Setup Node.js
       uses: actions/setup-node@v3
