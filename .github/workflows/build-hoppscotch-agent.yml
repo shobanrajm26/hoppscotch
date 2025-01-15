@@ -15,7 +15,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-22.04, windows-latest]
+        include:
+          - platform: "macos-latest" # for Arm based macs (M1 and above).
+            args: "--target aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs.
+            args: "--target x86_64-apple-darwin"
+          - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
+            args: ""
+          - platform: "windows-latest"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     defaults:
@@ -143,109 +151,115 @@ jobs:
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        cd packages/hoppscotch-agent
-        pnpm install --filter hoppscotch-agent
-
-    - name: Build Tauri app (Linux)
-      if: matrix.platform == 'ubuntu-22.04'
+    - name: Build Tauri app
+      uses: tauri-apps/tauri-action@v0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
-        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
-      run: |
-        cd packages/hoppscotch-agent
-        pnpm tauri build --verbose -b deb -b appimage -b updater
-
-    - name: Build Tauri app (Mac)
-      if: matrix.platform == 'macos-latest'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
-        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
-        APPLE_ID: ${{ secrets.APPLE_ID }}
-        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-      run: |
-        cd packages/hoppscotch-agent
-        pnpm tauri build --verbose --target x86_64-apple-darwin
-        pnpm tauri build --verbose --target aarch64-apple-darwin
-
-    - name: Build Tauri app (Windows)
-      if: matrix.platform == 'windows-latest'
-      shell: powershell
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
-        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      run: |
-        cd packages/hoppscotch-agent
-        # Build the portable version first and move it.
-        # This way the next build will regenerate `hoppscotch-agent.exe`.
-        pnpm tauri build --verbose --config src-tauri/tauri.portable.conf.json -- --no-default-features --features portable
-        Rename-Item -Path "src-tauri/target/release/hoppscotch-agent.exe" -NewName "hoppscotch-agent-portable.exe"
-
-        # Build the installer version.
-        pnpm tauri build --verbose -b msi -b updater
-
-    - name: Zip portable executable (Windows)
-      if: matrix.platform == 'windows-latest'
-      shell: powershell
-      run: |
-        Compress-Archive -Path "packages/hoppscotch-agent/src-tauri/target/release/hoppscotch-agent-portable.exe" -DestinationPath "packages/hoppscotch-agent/src-tauri/target/release/Hoppscotch_Agent_win_x64_portable.zip"
-
-    - name: Prepare artifacts
-      shell: bash
-      run: |
-        mkdir artifacts
-        mkdir artifacts/sigs
-        if [ "${{ matrix.platform }}" = "ubuntu-22.04" ]; then
-          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/appimage/*.AppImage artifacts/Hoppscotch_Agent_linux_x64.AppImage
-          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/appimage/*.AppImage.sig artifacts/sigs/Hoppscotch_Agent_linux_x64.AppImage.sig
-          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/deb/*.deb artifacts/Hoppscotch_Agent_linux_x64.deb
-        elif [ "${{ matrix.platform }}" = "macos-latest" ]; then
-          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*_x64.dmg artifacts/Hoppscotch_Agent_mac_x64.dmg
-          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz artifacts/Hoppscotch_Agent_mac_update_x64.tar.gz
-          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz.sig artifacts/sigs/Hoppscotch_Agent_mac_update_x64.tar.gz.sig
-          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*_aarch64.dmg artifacts/Hoppscotch_Agent_mac_aarch64.dmg
-          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz artifacts/Hoppscotch_Agent_mac_update_aarch64.tar.gz
-          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz.sig artifacts/sigs/Hoppscotch_Agent_mac_update_aarch64.tar.gz.sig
-        elif [ "${{ matrix.platform }}" = "windows-latest" ]; then
-          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/msi/*_x64_en-US.msi artifacts/Hoppscotch_Agent_win_x64.msi
-          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/msi/*_x64_en-US.msi.sig artifacts/sigs/Hoppscotch_Agent_win_x64.msi.sig
-          mv packages/hoppscotch-agent/src-tauri/target/release/Hoppscotch_Agent_win_x64_portable.zip artifacts/Hoppscotch_Agent_win_x64_portable.zip
-        fi
-
-    - name: Generate checksums (Linux)
-      if: matrix.platform == 'ubuntu-22.04'
-      run: |
-        cd artifacts
-        mkdir shas
-        for file in *; do
-          if [ -f "$file" ]; then
-            sha256sum "$file" > "shas/${file}.sha256"
-          fi
-        done
-
-    - name: Generate checksums (Mac)
-      if: matrix.platform == 'macos-latest'
-      run: |
-        cd artifacts
-        mkdir shas
-        for file in *; do
-          if [ -f "$file" ]; then
-            shasum -a 256 "$file" > "shas/${file}.sha256"
-          fi
-        done
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
       with:
-        name: Hoppscotch_Agent-${{ matrix.platform }}
-        path: artifacts/*
+        args: ${{ matrix.args }}
+#    - name: Install dependencies
+#      shell: bash
+#      run: |
+#        cd packages/hoppscotch-agent
+#        pnpm install --filter hoppscotch-agent
+
+#    - name: Build Tauri app (Linux)
+#      if: matrix.platform == 'ubuntu-22.04'
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
+#        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
+#      run: |
+#        cd packages/hoppscotch-desktop
+#        pnpm tauri build --verbose -b deb -b appimage -b updater
+#
+#    - name: Build Tauri app (Mac)
+#      if: matrix.platform == 'macos-latest'
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
+#        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
+#        APPLE_ID: ${{ secrets.APPLE_ID }}
+#        APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+#        APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+#        APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+#      run: |
+#        cd packages/hoppscotch-agent
+#        pnpm tauri build --verbose --target x86_64-apple-darwin
+#        pnpm tauri build --verbose --target aarch64-apple-darwin
+#
+#    - name: Build Tauri app (Windows)
+#      if: matrix.platform == 'windows-latest'
+#      shell: powershell
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
+#        TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
+#        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+#        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+#        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+#      run: |
+#        cd packages/hoppscotch-agent
+#        # Build the portable version first and move it.
+#        # This way the next build will regenerate `hoppscotch-agent.exe`.
+#        pnpm tauri build --verbose --config src-tauri/tauri.portable.conf.json -- --no-default-features --features portable
+#        Rename-Item -Path "src-tauri/target/release/hoppscotch-agent.exe" -NewName "hoppscotch-agent-portable.exe"
+#
+#        # Build the installer version.
+#        pnpm tauri build --verbose -b msi -b updater
+#
+#    - name: Zip portable executable (Windows)
+#      if: matrix.platform == 'windows-latest'
+#      shell: powershell
+#      run: |
+#        Compress-Archive -Path "packages/hoppscotch-agent/src-tauri/target/release/hoppscotch-agent-portable.exe" -DestinationPath "packages/hoppscotch-agent/src-tauri/target/release/Hoppscotch_Agent_win_x64_portable.zip"
+#
+#    - name: Prepare artifacts
+#      shell: bash
+#      run: |
+#        mkdir artifacts
+#        mkdir artifacts/sigs
+#        if [ "${{ matrix.platform }}" = "ubuntu-22.04" ]; then
+#          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/appimage/*.AppImage artifacts/Hoppscotch_Agent_linux_x64.AppImage
+#          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/appimage/*.AppImage.sig artifacts/sigs/Hoppscotch_Agent_linux_x64.AppImage.sig
+#          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/deb/*.deb artifacts/Hoppscotch_Agent_linux_x64.deb
+#        elif [ "${{ matrix.platform }}" = "macos-latest" ]; then
+#          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/*_x64.dmg artifacts/Hoppscotch_Agent_mac_x64.dmg
+#          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz artifacts/Hoppscotch_Agent_mac_update_x64.tar.gz
+#          mv packages/hoppscotch-agent/src-tauri/target/x86_64-apple-darwin/release/bundle/macos/*.app.tar.gz.sig artifacts/sigs/Hoppscotch_Agent_mac_update_x64.tar.gz.sig
+#          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*_aarch64.dmg artifacts/Hoppscotch_Agent_mac_aarch64.dmg
+#          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz artifacts/Hoppscotch_Agent_mac_update_aarch64.tar.gz
+#          mv packages/hoppscotch-agent/src-tauri/target/aarch64-apple-darwin/release/bundle/macos/*.app.tar.gz.sig artifacts/sigs/Hoppscotch_Agent_mac_update_aarch64.tar.gz.sig
+#        elif [ "${{ matrix.platform }}" = "windows-latest" ]; then
+#          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/msi/*_x64_en-US.msi artifacts/Hoppscotch_Agent_win_x64.msi
+#          mv packages/hoppscotch-agent/src-tauri/target/release/bundle/msi/*_x64_en-US.msi.sig artifacts/sigs/Hoppscotch_Agent_win_x64.msi.sig
+#          mv packages/hoppscotch-agent/src-tauri/target/release/Hoppscotch_Agent_win_x64_portable.zip artifacts/Hoppscotch_Agent_win_x64_portable.zip
+#        fi
+#
+#    - name: Generate checksums (Linux)
+#      if: matrix.platform == 'ubuntu-22.04'
+#      run: |
+#        cd artifacts
+#        mkdir shas
+#        for file in *; do
+#          if [ -f "$file" ]; then
+#            sha256sum "$file" > "shas/${file}.sha256"
+#          fi
+#        done
+#
+#    - name: Generate checksums (Mac)
+#      if: matrix.platform == 'macos-latest'
+#      run: |
+#        cd artifacts
+#        mkdir shas
+#        for file in *; do
+#          if [ -f "$file" ]; then
+#            shasum -a 256 "$file" > "shas/${file}.sha256"
+#          fi
+#        done
+#
+#    - name: Upload artifacts
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: Hoppscotch_Agent-${{ matrix.platform }}
+#        path: artifacts/*
