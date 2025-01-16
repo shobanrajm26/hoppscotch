@@ -136,7 +136,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          pnpm install --filter @hoppscotch/selfhost-desktop
+          pnpm install
 
       - name: Build Tauri app (Linux)
         if: matrix.platform == 'ubuntu-22.04'
