@@ -137,6 +137,8 @@ jobs:
         shell: bash
         run: |
           pnpm install
+          cd packages/hoppscotch-selfhost-desktop
+          pnpm gql-codegen
 
       - name: Build Tauri app (Linux)
         if: matrix.platform == 'ubuntu-22.04'
@@ -145,7 +147,6 @@ jobs:
 #          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.AGENT_TAURI_SIGNING_PRIVATE_KEY }}
 #          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.AGENT_TAURI_SIGNING_PASSWORD }}
         run: |
-          cd packages/hoppscotch-selfhost-desktop
           pnpm tauri build
 
       - name: Build Tauri app (Mac)
@@ -159,8 +160,6 @@ jobs:
 #          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 #          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
-          cd packages/hoppscotch-selfhost-desktop
-          pnpm gql-codegen
           pnpm run tauri build --target universal-apple-darwin
 
       - name: Build Tauri app (Windows)
