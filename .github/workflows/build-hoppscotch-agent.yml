@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-22.04, windows-latest]
+        platform: [macos-latest]
 
     runs-on: ${{ matrix.platform }}
     defaults:
@@ -160,7 +160,8 @@ jobs:
 #          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
           cd packages/hoppscotch-selfhost-desktop
-          pnpm tauri build --target universal-apple-darwin
+          pnpm install
+          pnpm run tauri build --target universal-apple-darwin
 
       - name: Build Tauri app (Windows)
         if: matrix.platform == 'windows-latest'
