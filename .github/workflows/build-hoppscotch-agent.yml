@@ -160,7 +160,7 @@ jobs:
 #          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
         run: |
           cd packages/hoppscotch-selfhost-desktop
-          pnpm install
+          pnpm gql-codegen
           pnpm run tauri build --target universal-apple-darwin
 
       - name: Build Tauri app (Windows)
