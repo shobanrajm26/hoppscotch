@@ -136,11 +136,7 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          cd packages/hoppscotch-backend
-          pnpm add -D prisma
-          pnpm add @prisma/client
-          pnpm exec prisma generate
-          pnpm install
+          pnpm install --filter @hoppscotch/selfhost-desktop
 
       - name: Build Tauri app (Linux)
         if: matrix.platform == 'ubuntu-22.04'
