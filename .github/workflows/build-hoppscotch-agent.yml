@@ -137,6 +137,8 @@ jobs:
         shell: bash
         run: |
           cd packages/hoppscotch-backend
+          pnpm add -D prisma
+          pnpm add @prisma/client
           pnpm exec prisma generate
           pnpm install
 
