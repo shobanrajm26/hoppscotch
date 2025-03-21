@@ -261,8 +261,9 @@ export function runRESTRequest$(
       variables: finalEnvsWithNonEmptyValues,
     })
 
-    const [stream, cancelRun] =
-      await createRESTNetworkRequestStream(effectiveRequest)
+    const [stream, cancelRun] = createRESTNetworkRequestStream(
+      await effectiveRequest
+    )
     cancelFunc = cancelRun
 
     const subscription = stream
@@ -281,6 +282,7 @@ export function runRESTRequest$(
               status: res.statusCode,
               body: getTestableBody(res),
               headers: res.headers,
+              duration: res.meta.responseDuration,
             }
           )
 
@@ -441,6 +443,7 @@ export function runTestRunnerRequest(
               status: res.statusCode,
               body: getTestableBody(res),
               headers: res.headers,
+              duration: res.meta.responseDuration,
             }
           )
 

@@ -1,8 +1,13 @@
 import { pipe } from "fp-ts/function"
 import * as TE from "fp-ts/TaskEither"
-import { platform } from "~/platform"
 import { runMutation } from "../GQLClient"
 import {
+  AcceptTeamInvitationDocument,
+  AcceptTeamInvitationMutation,
+  AcceptTeamInvitationMutationVariables,
+  CreateTeamInvitationDocument,
+  CreateTeamInvitationMutation,
+  CreateTeamInvitationMutationVariables,
   RevokeTeamInvitationDocument,
   RevokeTeamInvitationMutation,
   RevokeTeamInvitationMutationVariables,
@@ -31,16 +36,19 @@ export const createTeamInvitation = (
   inviteeEmail: Email,
   inviteeRole: TeamMemberRole,
   teamID: string
-) => {
-  return pipe(
-    platform.backend.createTeamInvitation<CreateTeamInvitationErrors>(
+) =>
+  pipe(
+    runMutation<
+      CreateTeamInvitationMutation,
+      CreateTeamInvitationMutationVariables,
+      CreateTeamInvitationErrors
+    >(CreateTeamInvitationDocument, {
       inviteeEmail,
       inviteeRole,
-      teamID
-    ),
+      teamID,
+    }),
     TE.map((x) => x.createTeamInvitation)
   )
-}
 
 export const revokeTeamInvitation = (inviteID: string) =>
   runMutation<
@@ -52,4 +60,10 @@ export const revokeTeamInvitation = (inviteID: string) =>
   })
 
 export const acceptTeamInvitation = (inviteID: string) =>
-  platform.backend.acceptTeamInvitation<AcceptTeamInvitationErrors>(inviteID)
+  runMutation<
+    AcceptTeamInvitationMutation,
+    AcceptTeamInvitationMutationVariables,
+    AcceptTeamInvitationErrors
+  >(AcceptTeamInvitationDocument, {
+    inviteID,
+  })

@@ -5,18 +5,14 @@ import { getService } from "~/modules/dioc"
 import { PersistenceService } from "~/services/persistence"
 import { version as hoppscotchCommonPkgVersion } from "./../../package.json"
 
-export async function useWhatsNewDialog() {
+export function useWhatsNewDialog() {
   const persistenceService = getService(PersistenceService)
 
-  const versionFromLocalStorage =
-    await persistenceService.getLocalConfig("hopp_v")
+  const versionFromLocalStorage = persistenceService.getLocalConfig("hopp_v")
 
   // Set new entry `hopp_v` under `localStorage` if not present
   if (!versionFromLocalStorage) {
-    await persistenceService.setLocalConfig(
-      "hopp_v",
-      hoppscotchCommonPkgVersion
-    )
+    persistenceService.setLocalConfig("hopp_v", hoppscotchCommonPkgVersion)
     return
   }
 
@@ -57,7 +53,7 @@ export async function useWhatsNewDialog() {
     }, 10000)
   }
 
-  await persistenceService.setLocalConfig("hopp_v", hoppscotchCommonPkgVersion)
+  persistenceService.setLocalConfig("hopp_v", hoppscotchCommonPkgVersion)
 }
 
 async function getReleaseNotes(v: string): Promise<string | undefined> {

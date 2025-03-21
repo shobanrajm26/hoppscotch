@@ -54,7 +54,7 @@ import "splitpanes/dist/splitpanes.css"
 import { useSetting } from "@composables/settings"
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core"
 import { useService } from "dioc/vue"
-import { computed, onMounted, ref, useSlots } from "vue"
+import { computed, ref, useSlots } from "vue"
 import { PersistenceService } from "~/services/persistence"
 
 const SIDEBAR_ON_LEFT = useSetting("SIDEBAR_ON_LEFT")
@@ -80,7 +80,7 @@ const props = defineProps({
   },
   isEmbed: {
     type: Boolean,
-    default: false,
+    defaul: false,
   },
   forceColumnLayout: {
     type: Boolean,
@@ -104,26 +104,23 @@ if (!COLUMN_LAYOUT.value) {
   PANE_MAIN_BOTTOM_SIZE.value = 50
 }
 
-async function setPaneEvent(
-  event: PaneEvent[],
-  type: "vertical" | "horizontal"
-) {
+function setPaneEvent(event: PaneEvent[], type: "vertical" | "horizontal") {
   if (!props.layoutId) return
   const storageKey = `${props.layoutId}-pane-config-${type}`
-  await persistenceService.setLocalConfig(storageKey, JSON.stringify(event))
+  persistenceService.setLocalConfig(storageKey, JSON.stringify(event))
 }
 
-async function populatePaneEvent() {
+function populatePaneEvent() {
   if (!props.layoutId) return
 
-  const verticalPaneData = await getPaneData("vertical")
+  const verticalPaneData = getPaneData("vertical")
   if (verticalPaneData) {
     const [mainPane, sidebarPane] = verticalPaneData
     PANE_MAIN_SIZE.value = mainPane?.size
     PANE_SIDEBAR_SIZE.value = sidebarPane?.size
   }
 
-  const horizontalPaneData = await getPaneData("horizontal")
+  const horizontalPaneData = getPaneData("horizontal")
   if (horizontalPaneData) {
     const [mainTopPane, mainBottomPane] = horizontalPaneData
     PANE_MAIN_TOP_SIZE.value = mainTopPane?.size
@@ -131,16 +128,12 @@ async function populatePaneEvent() {
   }
 }
 
-async function getPaneData(
-  type: "vertical" | "horizontal"
-): Promise<PaneEvent[] | null> {
+function getPaneData(type: "vertical" | "horizontal"): PaneEvent[] | null {
   const storageKey = `${props.layoutId}-pane-config-${type}`
-  const paneEvent = await persistenceService.getLocalConfig(storageKey)
+  const paneEvent = persistenceService.getLocalConfig(storageKey)
   if (!paneEvent) return null
   return JSON.parse(paneEvent)
 }
 
-onMounted(async () => {
-  await populatePaneEvent()
-})
+populatePaneEvent()
 </script>

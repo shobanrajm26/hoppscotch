@@ -11,7 +11,6 @@ import {
 import { tupleToRecord } from "~/helpers/functional/record"
 
 const getHeaderPair = flow(
-  S.replace(":", ": "),
   S.split(": "),
   // must have a key and a value
   O.fromPredicate((arr) => arr.length === 2),

@@ -94,7 +94,6 @@
           </span>
           <SmartEnvInput
             v-model="entry.key"
-            :class="{ 'opacity-50': !entry.active }"
             :placeholder="`${t('count.parameter', { count: index + 1 })}`"
             :auto-complete-env="true"
             :envs="envs"
@@ -113,15 +112,13 @@
               <HoppSmartFileChip
                 v-for="(file, fileIndex) in entry.value"
                 :key="`param-${index}-file-${fileIndex}`"
+                >{{ file.name }}</HoppSmartFileChip
               >
-                {{ file.name }}
-              </HoppSmartFileChip>
             </div>
           </div>
           <span v-else class="flex flex-1">
             <SmartEnvInput
               v-model="entry.value"
-              :class="{ 'opacity-50': !entry.active }"
               :placeholder="`${t('count.value', { count: index + 1 })}`"
               :auto-complete-env="true"
               :envs="envs"
@@ -145,7 +142,6 @@
               :auto-complete-env="true"
               :auto-complete-source="autoCompleteContenTypes"
               :envs="envs"
-              :class="{ 'opacity-50': !entry.active }"
               @change="
                 updateBodyParam(index, {
                   key: entry.key,

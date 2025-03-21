@@ -53,12 +53,7 @@
 
             <td @click.stop class="flex justify-end mr-10">
               <div class="relative">
-                <tippy
-                  :key="team.id"
-                  interactive
-                  trigger="click"
-                  theme="popover"
-                >
+                <tippy interactive trigger="click" theme="popover">
                   <HoppButtonSecondary
                     v-tippy="{ theme: 'tooltip' }"
                     :icon="IconMoreHorizontal"

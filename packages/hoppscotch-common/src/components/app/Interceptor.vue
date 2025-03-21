@@ -16,6 +16,7 @@
         class="flex flex-col"
       >
         <HoppSmartRadio
+          v-if="interceptor.interceptorID !== 'proxy'"
           :value="interceptor.interceptorID"
           :label="unref(interceptor.name(t))"
           :selected="interceptorSelection === interceptor.interceptorID"

@@ -1,8 +1,4 @@
-import { ref } from 'vue';
 import { InfraConfigEnum } from './backend/graphql';
-
-// Check if any input validation has failed
-export const hasInputValidationFailed = ref(false);
 
 export type SsoAuthProviders = 'google' | 'microsoft' | 'github';
 

@@ -4,7 +4,7 @@ import {
   HoppRESTRequest,
   RESTReqSchemaVersion,
 } from "@hoppscotch/data";
-import axios, { Method } from "axios";
+import axios, { AxiosInstance,Method } from "axios";
 import * as A from "fp-ts/Array";
 import * as E from "fp-ts/Either";
 import * as T from "fp-ts/Task";
@@ -69,7 +69,7 @@ const processEnvs = (envs: Partial<HoppEnvs>) => {
  * Transforms given request data to request-config used by request-runner to
  * perform HTTP request.
  * @param req Effective request data with parsed ENVs.
- * @returns Request config with data related to HTTP request.
+ * @returns Request config with data realted to HTTP request.
  */
 export const createRequest = (req: EffectiveHoppRESTRequest): RequestConfig => {
   const config: RequestConfig = {
@@ -100,7 +100,7 @@ export const createRequest = (req: EffectiveHoppRESTRequest): RequestConfig => {
  */
 export const requestRunner =
   (
-    requestConfig: RequestConfig
+    requestConfig: RequestConfig, axiosInstance: AxiosInstance
   ): TE.TaskEither<HoppCLIError, RequestRunnerResponse> =>
   async () => {
     const start = hrtime();
@@ -110,7 +110,7 @@ export const requestRunner =
       requestConfig.url = new URL(requestConfig.url ?? "").toString();
 
       let status: number;
-      const baseResponse = await axios(requestConfig);
+      const baseResponse = await axiosInstance(requestConfig);
       const { config } = baseResponse;
       // PR-COMMENT: type error
       const runnerResponse: RequestRunnerResponse = {
@@ -197,7 +197,7 @@ const getRequest = {
  */
 export const processRequest =
   (
-    params: ProcessRequestParams
+    params: ProcessRequestParams, axiosInstance : AxiosInstance
   ): T.Task<{ envs: HoppEnvs; report: RequestReport }> =>
   async () => {
     const { envs, path, request, delay } = params;
@@ -266,7 +266,7 @@ export const processRequest =
     // Executing request-runner.
     const requestRunnerRes = await delayPromiseFunction<
       E.Either<HoppCLIError, RequestRunnerResponse>
-    >(requestRunner(requestConfig), delay);
+    >(requestRunner(requestConfig ,axiosInstance), delay);
     if (E.isLeft(requestRunnerRes)) {
       // Updating report for errors & current result
       report.errors.push(requestRunnerRes.left);

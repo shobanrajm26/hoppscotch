@@ -7,7 +7,6 @@ import { applySetting } from "~/newstore/settings"
 import { useSettingStatic } from "~/composables/settings"
 
 export default <HoppModule>{
-  deprecated: true,
   onVueAppInit() {
     const interceptorService = getService(InterceptorService)
 

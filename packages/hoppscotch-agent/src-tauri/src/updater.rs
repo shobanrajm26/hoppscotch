@@ -26,7 +26,7 @@ pub async fn check_and_install_updates(
                         .map(|body| format!("\n\nRelease Notes: {}", body))
                         .unwrap_or("".into())
                 ))
-                .title("Hoppscotch Agent Update Available")
+                .title("Update Available")
                 .kind(MessageDialogKind::Info)
                 .buttons(MessageDialogButtons::OkCancelCustom(
                     "Update".to_string(),

@@ -4,7 +4,6 @@ import { def as environmentsDef } from "./platform/environments/environments.pla
 import { def as collectionsDef } from "./platform/collections/collections.platform"
 import { def as settingsDef } from "./platform/settings/settings.platform"
 import { def as historyDef } from "./platform/history/history.platform"
-import { def as backendDef } from "@hoppscotch/common/platform/std/backend"
 import { proxyInterceptor } from "@hoppscotch/common/platform/std/interceptors/proxy"
 import { NativeInterceptorService } from "./platform/interceptors/native"
 import { nextTick, ref, watch } from "vue"
@@ -32,7 +31,7 @@ const headerPaddingTop = ref("0px")
         paddingTop: headerPaddingTop,
         onHeaderAreaClick() {
           if (platform === "Darwin") {
-            // Drag the window when the user drags the header area
+            // Drag thw window when the user drags the header area
             // TODO: Ignore click on headers and fields
             appWindow.startDragging()
           }
@@ -64,7 +63,6 @@ const headerPaddingTop = ref("0px")
       cookiesEnabled: true,
       promptAsUsingCookies: false,
     },
-    backend: backendDef,
   })
 
   watch(

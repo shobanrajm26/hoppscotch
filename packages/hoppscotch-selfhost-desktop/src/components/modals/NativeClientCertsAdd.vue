@@ -27,7 +27,7 @@
                   :label="
                     pemCert?.type === 'loaded'
                       ? pemCert.filename
-                      : 'Add Certificate File'
+                      : 'Add Certifcate File'
                   "
                   filled
                   outline

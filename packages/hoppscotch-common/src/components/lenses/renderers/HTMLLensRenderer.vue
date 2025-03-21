@@ -137,15 +137,15 @@ const { downloadIcon, downloadResponse } = useDownloadResponse(
   })
 )
 const defaultPreview =
-  (await persistenceService.getLocalConfig("lens_html_preview")) === "true"
+  persistenceService.getLocalConfig("lens_html_preview") === "true"
 
 const { previewFrame, previewEnabled, togglePreview } = usePreview(
   defaultPreview,
   responseBodyText
 )
 
-const doTogglePreview = async () => {
-  await persistenceService.setLocalConfig(
+const doTogglePreview = () => {
+  persistenceService.setLocalConfig(
     "lens_html_preview",
     previewEnabled.value ? "false" : "true"
   )

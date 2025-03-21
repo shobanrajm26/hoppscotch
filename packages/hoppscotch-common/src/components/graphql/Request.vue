@@ -68,16 +68,15 @@ import { computed, ref, watch } from "vue"
 import { connection } from "~/helpers/graphql/connection"
 import { connect } from "~/helpers/graphql/connection"
 import { disconnect } from "~/helpers/graphql/connection"
-import { KernelInterceptorService } from "~/services/kernel-interceptor.service"
+import { InterceptorService } from "~/services/interceptor.service"
 import { useService } from "dioc/vue"
 import { defineActionHandler } from "~/helpers/actions"
 import { GQLTabService } from "~/services/tab/graphql"
-import { HoppGQLAuth, HoppGQLRequest } from "@hoppscotch/data"
 
 const t = useI18n()
 const tabs = useService(GQLTabService)
 
-const interceptorService = useService(KernelInterceptorService)
+const interceptorService = useService(InterceptorService)
 
 const connectionSwitchModal = ref(false)
 
@@ -99,28 +98,12 @@ const onConnectClick = () => {
 }
 
 const gqlConnect = () => {
-  const inheritedHeaders =
-    tabs.currentActiveTab.value.document.inheritedProperties?.headers.map(
-      (header) => {
-        if (header.inheritedHeader) {
-          return header.inheritedHeader
-        }
-        return []
-      }
-    ) as HoppGQLRequest["headers"]
-
-  connect({
-    url: url.value,
-    request: tabs.currentActiveTab.value.document.request,
-    inheritedHeaders,
-    inheritedAuth: tabs.currentActiveTab.value.document.inheritedProperties
-      ?.auth.inheritedAuth as HoppGQLAuth,
-  })
+  connect(url.value, tabs.currentActiveTab.value?.document.request.headers)
 
   platform.analytics?.logEvent({
     type: "HOPP_REQUEST_RUN",
     platform: "graphql-schema",
-    strategy: interceptorService.current.value!.id,
+    strategy: interceptorService.currentInterceptorID.value!,
   })
 }
 

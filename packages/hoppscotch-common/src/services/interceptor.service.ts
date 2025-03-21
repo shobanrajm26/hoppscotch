@@ -258,8 +258,4 @@ export class InterceptorService extends Service {
 
     return interceptor.runRequest(req)
   }
-
-  public static convertArrayBufferToString(data: ArrayBuffer): string {
-    return new TextDecoder().decode(data).replace(/\0+$/, "")
-  }
 }

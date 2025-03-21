@@ -56,7 +56,6 @@
         :label="'Proxy Bypass (Enter comma separated values to bypass proxy settings. Example: localhost, .example.com)'"
         input-styles="input floating-input"
       />
-
       <p class="my-1 text-secondaryLight">
         Hoppscotch native interceptor supports HTTP/HTTPS/SOCKS proxies along with NTLM and Basic Auth in those proxies. Include the username and password for the proxy authentication in the URL itself.
       </p>

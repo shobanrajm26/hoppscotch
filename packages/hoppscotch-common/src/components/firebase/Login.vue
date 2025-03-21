@@ -316,9 +316,9 @@ const signInWithEmail = async () => {
 
   await platform.auth
     .signInWithEmail(form.email)
-    .then(async () => {
+    .then(() => {
       mode.value = "email-sent"
-      await persistenceService.setLocalConfig("emailForSignIn", form.email)
+      persistenceService.setLocalConfig("emailForSignIn", form.email)
     })
     .catch((e) => {
       console.error(e)

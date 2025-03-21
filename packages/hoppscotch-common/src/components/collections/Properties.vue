@@ -199,7 +199,7 @@ const activeTabIsDetails = computed(() => activeTab.value === "details")
 
 watch(
   editableCollection,
-  async (updatedEditableCollection) => {
+  (updatedEditableCollection) => {
     if (props.show && props.editingProperties) {
       const unsavedCollectionProperties: EditingProperties = {
         collection: updatedEditableCollection,
@@ -207,7 +207,7 @@ watch(
         path: props.editingProperties.path,
         inheritedProperties: props.editingProperties.inheritedProperties,
       }
-      await persistenceService.setLocalConfig(
+      persistenceService.setLocalConfig(
         "unsaved_collection_properties",
         JSON.stringify(unsavedCollectionProperties)
       )
@@ -222,7 +222,7 @@ const activeTab = useVModel(props, "modelValue", emit)
 
 watch(
   () => props.show,
-  async (show) => {
+  (show) => {
     // `Details` tab doesn't exist for personal workspace, hence switching to the `Headers` tab
     // The modal can appear empty while switching from a team workspace with `Details` as the active tab
     if (activeTab.value === "details" && !props.showDetails) {
@@ -245,14 +245,12 @@ watch(
         },
       }
 
-      await persistenceService.removeLocalConfig(
-        "unsaved_collection_properties"
-      )
+      persistenceService.removeLocalConfig("unsaved_collection_properties")
     }
   }
 )
 
-const saveEditedCollection = async () => {
+const saveEditedCollection = () => {
   if (!props.editingProperties) return
   const finalCollection = clone(editableCollection.value)
   const collection = {
@@ -264,11 +262,11 @@ const saveEditedCollection = async () => {
     isRootCollection: props.editingProperties.isRootCollection,
   }
   emit("set-collection-properties", collection as EditingProperties)
-  await persistenceService.removeLocalConfig("unsaved_collection_properties")
+  persistenceService.removeLocalConfig("unsaved_collection_properties")
 }
 
-const hideModal = async () => {
-  await persistenceService.removeLocalConfig("unsaved_collection_properties")
+const hideModal = () => {
+  persistenceService.removeLocalConfig("unsaved_collection_properties")
   emit("hide-modal")
 }
 

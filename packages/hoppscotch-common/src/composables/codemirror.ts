@@ -358,8 +358,8 @@ export function useCodemirror(
           view.requestMeasure()
 
           if (event.target && options.contextMenuEnabled) {
-            // close the context menu when the editor is scrolled
-            closeContextMenu()
+            // Debounce to make the performance better
+            debouncedTextSelection(30)()
           }
         },
       }),
@@ -402,8 +402,7 @@ export function useCodemirror(
       Prec.highest(
         keymap.of([
           {
-            key: "Ctrl-Enter" /* Windows */,
-            mac: "Cmd-Enter" /* Mac */,
+            key: "Cmd-Enter" /* macOS */ || "Ctrl-Enter" /* Windows */,
             preventDefault: true,
             run: () => true,
           },

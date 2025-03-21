@@ -3,10 +3,7 @@ import { isEqual } from "lodash-es"
 import { computed } from "vue"
 import { getDefaultRESTRequest } from "~/helpers/rest/default"
 import { HoppRESTSaveContext, HoppTabDocument } from "~/helpers/rest/document"
-import { getService } from "~/modules/dioc"
-import { PersistenceService, STORE_KEYS } from "../persistence"
 import { TabService } from "./tab"
-import { PersistableTabState } from "."
 
 export class RESTTabService extends TabService<HoppTabDocument> {
   public static readonly ID = "REST_TAB_SERVICE"
@@ -62,14 +59,6 @@ export class RESTTabService extends TabService<HoppTabDocument> {
       }
     }),
   }))
-
-  protected async loadPersistedState(): Promise<PersistableTabState<HoppTabDocument> | null> {
-    const persistenceService = getService(PersistenceService)
-    const savedState = await persistenceService.getNullable<
-      PersistableTabState<HoppTabDocument>
-    >(STORE_KEYS.REST_TABS)
-    return savedState
-  }
 
   public getTabRefWithSaveContext(ctx: HoppRESTSaveContext) {
     for (const tab of this.tabMap.values()) {

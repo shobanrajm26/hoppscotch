@@ -4,8 +4,6 @@ import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 import path from 'path';
 import Icons from "unplugin-icons/vite";
-import IconsResolver from 'unplugin-icons/resolver';
-import Components from 'unplugin-vue-components/vite';
 
 const host = process.env.TAURI_DEV_HOST;
 
@@ -13,14 +11,7 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
   plugins: [
     vue(),
-    Icons({ compiler: 'vue3' }),
-    Components({
-      resolvers: [
-        IconsResolver({
-          prefix: '' // optional, default is 'i'
-        })
-      ]
-    })
+    Icons({})
   ],
   css: {
     postcss: {
@@ -43,7 +34,7 @@ export default defineConfig(async () => ({
   server: {
     port: 1420,
     strictPort: true,
-    host: '127.0.0.1',
+    host: host || false,
     hmr: host
       ? {
         protocol: "ws",

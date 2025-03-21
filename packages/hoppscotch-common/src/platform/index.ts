@@ -9,17 +9,12 @@ import { ExperimentsPlatformDef } from "./experiments"
 import { HistoryPlatformDef } from "./history"
 import { InfraPlatformDef } from "./infra"
 import { InspectorsPlatformDef } from "./inspectors"
-import { KernelInterceptorsPlatformDef } from "./kernel-interceptors"
-// NOTE: To be deprecated
-// import { InterceptorsPlatformDef } from "./interceptors"
-// import { IOPlatformDef } from "./io"
+import { InterceptorsPlatformDef } from "./interceptors"
+import { IOPlatformDef } from "./io"
 import { LimitsPlatformDef } from "./limits"
 import { SettingsPlatformDef } from "./settings"
 import { SpotlightPlatformDef } from "./spotlight"
 import { UIPlatformDef } from "./ui"
-import { BackendPlatformDef } from "./backend"
-import { OrganizationPlatformDef } from "./organization"
-import { KernelIO } from "./kernel-io"
 
 export type PlatformDef = {
   ui?: UIPlatformDef
@@ -27,18 +22,14 @@ export type PlatformDef = {
   addedServices?: Array<ServiceClassInstance<unknown>>
   auth: AuthPlatformDef
   analytics?: AnalyticsPlatformDef
-  // NOTE: To be deprecated
-  // io: IOPlatformDef
-  kernelIO: KernelIO
+  io: IOPlatformDef
   sync: {
     environments: EnvironmentsPlatformDef
     collections: CollectionsPlatformDef
     settings: SettingsPlatformDef
     history: HistoryPlatformDef
   }
-  // NOTE: To be deprecated
-  // interceptors: InterceptorsPlatformDef
-  kernelInterceptors: KernelInterceptorsPlatformDef
+  interceptors: InterceptorsPlatformDef
   additionalInspectors?: InspectorsPlatformDef
   spotlight?: SpotlightPlatformDef
   platformFeatureFlags: {
@@ -67,8 +58,6 @@ export type PlatformDef = {
   limits?: LimitsPlatformDef
   infra?: InfraPlatformDef
   experiments?: ExperimentsPlatformDef
-  backend: BackendPlatformDef
-  organization?: OrganizationPlatformDef
 }
 
 export let platform: PlatformDef

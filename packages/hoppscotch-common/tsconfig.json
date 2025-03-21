@@ -29,8 +29,7 @@
       "unplugin-fonts/client",
       "vite-plugin-pages/client",
       "vite-plugin-vue-layouts/client",
-      "vite-plugin-pwa/client",
-      "./src/types/kernel.d.ts"
+      "vite-plugin-pwa/client"
     ]
   },
   "include": [

@@ -71,10 +71,10 @@ let i18nInstance: I18n<
   true
 > | null = null
 
-const resolveCurrentLocale = async () =>
+const resolveCurrentLocale = () =>
   pipe(
     // Resolve from locale and make sure it is in languages
-    await persistenceService.getLocalConfig("locale"),
+    persistenceService.getLocalConfig("locale"),
     O.fromNullable,
     O.filter((locale) =>
       pipe(
@@ -123,7 +123,7 @@ export const changeAppLanguage = async (locale: string) => {
   // TODO: Look into the type issues here
   i18nInstance.global.locale.value = locale
 
-  await persistenceService.setLocalConfig("locale", locale)
+  persistenceService.setLocalConfig("locale", locale)
 }
 
 /**
@@ -134,7 +134,7 @@ export function getI18n() {
 }
 
 export default <HoppModule>{
-  async onVueAppInit(app) {
+  onVueAppInit(app) {
     const i18n = createI18n(<I18nOptions>{
       locale: "en", // TODO: i18n system!
       fallbackLocale: "en",
@@ -153,10 +153,10 @@ export default <HoppModule>{
     )
 
     // TODO: Global loading state to hide the resolved lang loading
-    const currentLocale = await resolveCurrentLocale()
+    const currentLocale = resolveCurrentLocale()
     changeAppLanguage(currentLocale)
 
-    await persistenceService.setLocalConfig("locale", currentLocale)
+    persistenceService.setLocalConfig("locale", currentLocale)
   },
   onBeforeRouteChange(to, _, router) {
     // Convert old locale path format to new format

@@ -140,7 +140,7 @@
                     }
                   "
                 />
-                <HoppSmartItem
+                <HoppSmartItem v-if="false"
                   ref="shareAction"
                   :icon="IconShare2"
                   :label="t('action.share')"

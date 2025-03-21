@@ -195,7 +195,7 @@
                   "
                 />
                 <hr />
-                <HoppSmartItem
+                <HoppSmartItem v-if="false"
                   ref="copyRequestAction"
                   :label="t('request.share_request')"
                   :icon="IconShare2"
@@ -261,15 +261,15 @@ import { platform } from "~/platform"
 import { HoppRESTRequest } from "@hoppscotch/data"
 import { useService } from "dioc/vue"
 import { InspectionService } from "~/services/inspection"
+import { InterceptorService } from "~/services/interceptor.service"
 import { HoppTab } from "~/services/tab"
 import { HoppRequestDocument } from "~/helpers/rest/document"
 import { RESTTabService } from "~/services/tab/rest"
 import { getMethodLabelColor } from "~/helpers/rest/labelColoring"
 import { WorkspaceService } from "~/services/workspace.service"
-import { KernelInterceptorService } from "~/services/kernel-interceptor.service"
 
 const t = useI18n()
-const interceptorService = useService(KernelInterceptorService)
+const interceptorService = useService(InterceptorService)
 
 const methods = [
   "GET",
@@ -348,7 +348,7 @@ const newSendRequest = async () => {
   platform.analytics?.logEvent({
     type: "HOPP_REQUEST_RUN",
     platform: "rest",
-    strategy: interceptorService.current.value!.id,
+    strategy: interceptorService.currentInterceptorID.value!,
     workspaceType: workspaceService.currentWorkspace.value.type,
   })
 

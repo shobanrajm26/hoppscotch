@@ -390,46 +390,46 @@
 </template>
 
 <script setup lang="ts">
-import { useGQLQuery } from "@composables/graphql"
-import * as A from "fp-ts/Array"
-import * as E from "fp-ts/Either"
-import * as O from "fp-ts/Option"
+import { watch, ref, reactive, computed, Ref, onMounted } from "vue"
 import * as T from "fp-ts/Task"
+import * as E from "fp-ts/Either"
+import * as A from "fp-ts/Array"
+import * as O from "fp-ts/Option"
 import { flow, pipe } from "fp-ts/function"
-import { computed, onMounted, reactive, ref, Ref, watch } from "vue"
-import { GQLError } from "~/helpers/backend/GQLClient"
+import { Email, EmailCodec } from "../../helpers/backend/types/Email"
 import {
-  GetPendingInvitesDocument,
-  GetPendingInvitesQuery,
-  GetPendingInvitesQueryVariables,
   TeamInvitationAddedDocument,
   TeamInvitationRemovedDocument,
   TeamMemberRole,
+  GetPendingInvitesDocument,
+  GetPendingInvitesQuery,
+  GetPendingInvitesQueryVariables,
 } from "../../helpers/backend/graphql"
 import {
   createTeamInvitation,
   CreateTeamInvitationErrors,
   revokeTeamInvitation,
 } from "../../helpers/backend/mutations/TeamInvitation"
-import { Email, EmailCodec } from "../../helpers/backend/types/Email"
+import { GQLError } from "~/helpers/backend/GQLClient"
+import { useGQLQuery } from "@composables/graphql"
 
 import { useI18n } from "@composables/i18n"
 import { useToast } from "@composables/toast"
 import { useColorMode } from "~/composables/theming"
 
-import { refAutoReset } from "@vueuse/core"
+import IconTrash from "~icons/lucide/trash"
+import IconPlus from "~icons/lucide/plus"
+import IconAlertTriangle from "~icons/lucide/alert-triangle"
+import IconMailCheck from "~icons/lucide/mail-check"
+import IconCircleDot from "~icons/lucide/circle-dot"
+import IconCircle from "~icons/lucide/circle"
+import IconArrowLeft from "~icons/lucide/arrow-left"
+import IconCopy from "~icons/lucide/copy"
+import IconCheck from "~icons/lucide/check"
 import { TippyComponent } from "vue-tippy"
+import { refAutoReset } from "@vueuse/core"
 import { copyToClipboard } from "~/helpers/utils/clipboard"
 import { platform } from "~/platform"
-import IconAlertTriangle from "~icons/lucide/alert-triangle"
-import IconArrowLeft from "~icons/lucide/arrow-left"
-import IconCheck from "~icons/lucide/check"
-import IconCircle from "~icons/lucide/circle"
-import IconCircleDot from "~icons/lucide/circle-dot"
-import IconCopy from "~icons/lucide/copy"
-import IconMailCheck from "~icons/lucide/mail-check"
-import IconPlus from "~icons/lucide/plus"
-import IconTrash from "~icons/lucide/trash"
 
 const copyIcons: Record<string, Ref<typeof IconCopy | typeof IconCheck>> = {}
 const getCopyIcon = (id: string) => {
@@ -463,8 +463,6 @@ const emit = defineEmits<{
 
 const inviteMethod = ref<"email" | "link">("email")
 
-let organizationDomain = ""
-
 onMounted(async () => {
   const getIsSMTPEnabled = platform.infra?.getIsSMTPEnabled
 
@@ -474,18 +472,6 @@ onMounted(async () => {
     if (E.isRight(res)) {
       inviteMethod.value = res.right ? "email" : "link"
     }
-  }
-
-  const { organization } = platform
-
-  if (!organization) {
-    return
-  }
-
-  if (!organization.isDefaultCloudInstance) {
-    const orgInfo = await organization.getOrgInfo()
-
-    organizationDomain = orgInfo?.orgDomain ?? ""
   }
 })
 
@@ -580,18 +566,9 @@ const removeNewInvitee = (id: number) => {
 }
 
 const copyInviteLink = (invitationID: string) => {
-  let inviteLink = ""
-
-  const { organization } = platform
-
-  if (organization && !organization.isDefaultCloudInstance) {
-    const rootDomain = organization?.getRootDomain()
-    inviteLink = `https://${organizationDomain}.${rootDomain}/join-team?id=${invitationID}`
-  } else {
-    inviteLink = `${import.meta.env.VITE_BASE_URL}/join-team?id=${invitationID}`
-  }
-
-  copyToClipboard(inviteLink)
+  copyToClipboard(
+    `${import.meta.env.VITE_BASE_URL}/join-team?id=${invitationID}`
+  )
 
   getCopyIcon(invitationID).value = IconCheck
 }

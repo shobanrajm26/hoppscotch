@@ -243,9 +243,9 @@ const persistenceService = useService(PersistenceService)
 
 const collectionPropertiesModalActiveTab = ref<GQLOptionTabs>("headers")
 
-onMounted(async () => {
+onMounted(() => {
   const localOAuthTempConfig =
-    await persistenceService.getLocalConfig("oauth_temp_config")
+    persistenceService.getLocalConfig("oauth_temp_config")
 
   if (!localOAuthTempConfig) {
     return
@@ -260,8 +260,9 @@ onMounted(async () => {
 
   if (context?.type === "collection-properties") {
     // load the unsaved editing properties
-    const unsavedCollectionPropertiesString =
-      await persistenceService.getLocalConfig("unsaved_collection_properties")
+    const unsavedCollectionPropertiesString = persistenceService.getLocalConfig(
+      "unsaved_collection_properties"
+    )
 
     if (unsavedCollectionPropertiesString) {
       const unsavedCollectionProperties: EditingProperties = JSON.parse(
@@ -283,7 +284,7 @@ onMounted(async () => {
       editingProperties.value = unsavedCollectionProperties
     }
 
-    await persistenceService.removeLocalConfig("oauth_temp_config")
+    persistenceService.removeLocalConfig("oauth_temp_config")
     collectionPropertiesModalActiveTab.value = "authorization"
     showModalEditProperties.value = true
   }

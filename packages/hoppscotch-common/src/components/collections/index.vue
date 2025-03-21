@@ -371,7 +371,7 @@ const currentUser = useReadonlyStream(
 )
 const myCollections = useReadonlyStream(restCollections$, [], "deep")
 
-// Dragging
+// Draging
 const draggingToRoot = ref(false)
 const collectionMoveLoading = ref<string[]>([])
 const requestMoveLoading = ref<string[]>([])
@@ -440,9 +440,9 @@ const persistenceService = useService(PersistenceService)
 
 const collectionPropertiesModalActiveTab = ref<RESTOptionTabs>("headers")
 
-onMounted(async () => {
+onMounted(() => {
   const localOAuthTempConfig =
-    await persistenceService.getLocalConfig("oauth_temp_config")
+    persistenceService.getLocalConfig("oauth_temp_config")
 
   if (!localOAuthTempConfig) {
     return
@@ -457,8 +457,9 @@ onMounted(async () => {
 
   if (context?.type === "collection-properties") {
     // load the unsaved editing properties
-    const unsavedCollectionPropertiesString =
-      await persistenceService.getLocalConfig("unsaved_collection_properties")
+    const unsavedCollectionPropertiesString = persistenceService.getLocalConfig(
+      "unsaved_collection_properties"
+    )
 
     if (unsavedCollectionPropertiesString) {
       const unsavedCollectionProperties: EditingProperties = JSON.parse(
@@ -480,7 +481,7 @@ onMounted(async () => {
       editingProperties.value = unsavedCollectionProperties
     }
 
-    await persistenceService.removeLocalConfig("oauth_temp_config")
+    persistenceService.removeLocalConfig("oauth_temp_config")
     collectionPropertiesModalActiveTab.value = "authorization"
     showModalEditProperties.value = true
   }
@@ -1941,7 +1942,7 @@ const selectPicked = (payload: Picked | null) => {
 
 /**
  * This function is called when the user clicks on a request
- * @param selectedRequest The request that the user clicked on emitted from the collection tree
+ * @param selectedRequest The request that the user clicked on emited from the collection tree
  */
 const selectRequest = (selectedRequest: {
   request: HoppRESTRequest
@@ -2641,7 +2642,7 @@ const initializeDownloadCollection = async (
   collectionJSON: string,
   name: string | null
 ) => {
-  const result = await platform.kernelIO.saveFileWithDialog({
+  const result = await platform.io.saveFileWithDialog({
     data: collectionJSON,
     contentType: "application/json",
     suggestedFilename: `${name ?? "collection"}.json`,
