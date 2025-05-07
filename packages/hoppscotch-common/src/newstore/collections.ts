@@ -29,6 +29,7 @@ const defaultRESTCollectionState = {
         authActive: false,
       },
       headers: [],
+      variables: [],
     }),
   ],
 }
@@ -44,6 +45,7 @@ const defaultGraphqlCollectionState = {
         authActive: false,
       },
       headers: [],
+      variables: [],
     }),
   ],
 }
@@ -91,50 +93,41 @@ export function cascadeParentCollectionForHeaderAuth(
     },
   }
   const headers: HoppInheritedProperty["headers"] = []
+  const variables: Record<string, string> = {}
 
-  if (!folderPath) return { auth, headers }
+  if (!folderPath) return { auth, headers, variables }
 
   const path = folderPath.split("/").map((i) => parseInt(i))
 
   // Check if the path is empty or invalid
   if (!path || path.length === 0) {
     console.error("Invalid path:", folderPath)
-    return { auth, headers }
+    return { auth, headers, variables }
   }
 
   // Loop through the path and get the last parent folder with authType other than 'inherit'
   for (let i = 0; i < path.length; i++) {
     const parentFolder = navigateToFolderWithIndexPath(
       collectionStore.value.state,
-      [...path.slice(0, i + 1)] // Create a copy of the path array
+      path.slice(0, i + 1)
     )
 
     // Check if parentFolder is undefined or null
     if (!parentFolder) {
       console.error("Parent folder not found for path:", path)
-      return { auth, headers }
+      return { auth, headers, variables }
     }
 
     const parentFolderAuth = parentFolder.auth as HoppRESTAuth | HoppGQLAuth
     const parentFolderHeaders = parentFolder.headers as
       | HoppRESTHeaders
       | GQLHeader[]
+    const parentFolderVariables = parentFolder.variables || []
 
-    // check if the parent folder has authType 'inherit' and if it is the root folder
-    if (
-      parentFolderAuth?.authType === "inherit" &&
-      [...path.slice(0, i + 1)].length === 1
-    ) {
-      auth = {
-        parentID: [...path.slice(0, i + 1)].join("/"),
-        parentName: parentFolder.name,
-        inheritedAuth: auth.inheritedAuth,
-      }
-    }
-
+    // Cascade auth if not 'inherit'
     if (parentFolderAuth?.authType !== "inherit") {
       auth = {
-        parentID: [...path.slice(0, i + 1)].join("/"),
+        parentID: parentFolder._ref_id,
         parentName: parentFolder.name,
         inheritedAuth: parentFolderAuth,
       }
@@ -144,30 +137,39 @@ export function cascadeParentCollectionForHeaderAuth(
     if (parentFolderHeaders) {
       const activeHeaders = parentFolderHeaders.filter((h) => h.active)
       activeHeaders.forEach((header) => {
-        const index = headers.findIndex(
-          (h) => h.inheritedHeader?.key === header.key
-        )
-        const currentPath = [...path.slice(0, i + 1)].join("/")
-        if (index !== -1) {
-          // Replace the existing header with the same key
-          headers[index] = {
-            parentID: currentPath,
-            parentName: parentFolder.name,
-            inheritedHeader: header,
-          }
+        const existingIndex = headers.findIndex((h) => h.key === header.key)
+        if (existingIndex !== -1) {
+          headers[existingIndex] = header
         } else {
-          headers.push({
-            parentID: currentPath,
-            parentName: parentFolder.name,
-            inheritedHeader: header,
-          })
+          headers.push(header)
         }
       })
     }
+
+    // Update variables, overwriting duplicates by key
+    parentFolderVariables.forEach((variable) => {
+      variables[variable.key] = variable.value
+    })
   }
 
-  return { auth, headers }
+  return { auth, headers, variables }
 }
+
+// export function getActiveCollectionVariables(): { key: string; value: string }[] {
+//   const activeVariables: { key: string; value: string }[] = []
+//
+//   // Iterate through all collections in the store
+//   restCollectionStore.value.state.forEach((collection) => {
+//     const variables = collection.variables ?? [] // Default to an empty array if undefined
+//     variables
+//       .filter((variable) => variable.active) // Only include active variables
+//       .forEach((variable) => {
+//         activeVariables.push({ key: variable.key, value: variable.value })
+//       })
+//   })
+//
+//   return activeVariables
+// }
 
 function reorderItems(array: unknown[], from: number, to: number) {
   const item = array.splice(from, 1)[0]
@@ -254,6 +256,7 @@ const restCollectionDispatchers = defineDispatchers({
         authActive: true,
       },
       headers: [],
+      variables: [],
     })
 
     const newState = state
@@ -879,6 +882,7 @@ const gqlCollectionDispatchers = defineDispatchers({
         authActive: true,
       },
       headers: [],
+      variables: [],
     })
     const newState = state
     const indexPaths = path.split("/").map((x) => parseInt(x))
@@ -1679,9 +1683,9 @@ function removeDuplicateCollectionsFromPath(
 
   const parentCollection = parentPath
     ? navigateToFolderWithIndexPath(
-        collections,
-        parentPath.split("/").map((x) => parseInt(x)) || []
-      )
+      collections,
+      parentPath.split("/").map((x) => parseInt(x)) || []
+    )
     : undefined
 
   if (collectionPath && parentCollection) {

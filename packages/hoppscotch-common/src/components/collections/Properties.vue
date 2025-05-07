@@ -42,7 +42,21 @@
             {{ t("helpers.collection_properties_authorization") }}
           </div>
         </HoppSmartTab>
-
+        <HoppSmartTab id="variables" :label="`${t('tab.variables')}`">
+          <HttpRequestVariables
+            v-model="editableCollection.variables"
+            :is-collection-property="true"
+            :is-root-collection="editingProperties.isRootCollection"
+            :inherited-properties="editingProperties.inheritedProperties"
+            :source="source"
+          />
+          <div
+            class="bg-bannerInfo px-4 py-2 flex items-center sticky bottom-0"
+          >
+            <icon-lucide-info class="svg-icons mr-2" />
+            {{ t("helpers.collection_properties_variable") }}
+          </div>
+        </HoppSmartTab>
         <HoppSmartTab
           v-if="showDetails"
           :id="'details'"
@@ -124,6 +138,7 @@ import {
   HoppGQLAuth,
   HoppRESTAuth,
   HoppRESTHeaders,
+  HoppRESTRequestVariables,
 } from "@hoppscotch/data"
 import { refAutoReset, useVModel } from "@vueuse/core"
 import { useService } from "dioc/vue"
@@ -151,7 +166,7 @@ export type EditingProperties = {
 
 type HoppCollectionAuth = HoppRESTAuth | HoppGQLAuth
 type HoppCollectionHeaders = HoppRESTHeaders | GQLHeader[]
-
+type HoppCollectionRequestVariables = HoppRESTRequestVariables
 const toast = useToast()
 
 const props = withDefaults(
@@ -182,8 +197,10 @@ const emit = defineEmits<{
 const editableCollection = ref<{
   headers: HoppCollectionHeaders
   auth: HoppCollectionAuth
+  variables: HoppCollectionRequestVariables
 }>({
   headers: [],
+  variables: [],
   auth: {
     authType: "inherit",
     authActive: false,
@@ -235,6 +252,9 @@ watch(
       )
       editableCollection.value.headers = clone(
         props.editingProperties.collection.headers as HoppCollectionHeaders
+      )
+      editableCollection.value.variables = clone(
+        props.editingProperties.collection.variables as HoppCollectionRequestVariables
       )
     } else {
       editableCollection.value = {

@@ -70,6 +70,7 @@ export function translateToNewRESTCollection(x: any): HoppCollection {
 
   const auth = x.auth ?? { authType: "inherit", authActive: true }
   const headers = x.headers ?? []
+  const variables = x.variables ?? []
 
   const obj = makeCollection({
     name,
@@ -77,6 +78,7 @@ export function translateToNewRESTCollection(x: any): HoppCollection {
     requests,
     auth,
     headers,
+    variables: [],
   })
 
   if (x.id) obj.id = x.id
@@ -98,6 +100,7 @@ export function translateToNewGQLCollection(x: any): HoppCollection {
 
   const auth = x.auth ?? { authType: "inherit", authActive: true }
   const headers = x.headers ?? []
+  const variables = x.variables ?? []
 
   const obj = makeCollection({
     name,
@@ -105,6 +108,7 @@ export function translateToNewGQLCollection(x: any): HoppCollection {
     requests,
     auth,
     headers,
+    variables: [],
   })
 
   if (x.id) obj.id = x.id

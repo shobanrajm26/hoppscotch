@@ -238,7 +238,8 @@ export function runRESTRequest$(
           return []
         }
       )
-
+    console.log('..tab value..'+JSON.stringify(tab.value.document,null,2))
+    // const collectionVariables = getActiveCollectionVariables()
     const finalRequest = {
       ...tab.value.document.request,
       auth: requestAuth ?? { authType: "none", authActive: false },
@@ -253,13 +254,14 @@ export function runRESTRequest$(
     const finalEnvsWithNonEmptyValues = filterNonEmptyEnvironmentVariables(
       combineEnvVariables(finalEnvs)
     )
-
+    console.log("Combined finalEnvsWithNonEmptyValues Variables:.." + JSON.stringify(finalEnvsWithNonEmptyValues,null,2));
     const effectiveRequest = await getEffectiveRESTRequest(finalRequest, {
       id: "env-id",
       v: 1,
       name: "Env",
       variables: finalEnvsWithNonEmptyValues,
     })
+    console.log("effectiveRequest:.." + JSON.stringify(effectiveRequest,null,2));
 
     const [stream, cancelRun] =
       await createRESTNetworkRequestStream(effectiveRequest)
@@ -395,9 +397,9 @@ export function runTestRunnerRequest(
 ): Promise<
   | E.Left<"script_fail">
   | E.Right<{
-      response: HoppRESTResponse
-      testResult: HoppTestResult
-    }>
+  response: HoppRESTResponse
+  testResult: HoppTestResult
+}>
   | undefined
 > {
   return getFinalEnvsFromPreRequest(
