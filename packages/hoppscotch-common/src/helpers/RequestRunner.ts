@@ -44,6 +44,7 @@ import {
   getTemporaryVariables,
   setTemporaryVariables,
 } from "./runner/temp_envs"
+import { getRESTCollectionByRefId } from "~/newstore/collections"
 
 const secretEnvironmentService = getService(SecretEnvironmentService)
 
@@ -81,10 +82,12 @@ export const combineEnvVariables = (variables: {
     temp?: Environment["variables"]
   }
   requestVariables: Environment["variables"]
+  collectionVariables?: Environment["variables"]
 }) => [
   ...variables.requestVariables,
   ...(variables.environments.temp ?? []),
   ...variables.environments.selected,
+  ...(variables.collectionVariables ?? []),
   ...variables.environments.global,
 ]
 
@@ -238,8 +241,13 @@ export function runRESTRequest$(
           return []
         }
       )
-    console.log('..tab value..'+JSON.stringify(tab.value.document,null,2))
-    // const collectionVariables = getActiveCollectionVariables()
+    console.log(
+      "tab parent.." + tab.value.document.inheritedProperties?.auth.parentID
+    )
+    const collection = getRESTCollectionByRefId(
+      tab.value.document.inheritedProperties?.auth.parentID
+    )
+    console.log(collection?.variables)
     const finalRequest = {
       ...tab.value.document.request,
       auth: requestAuth ?? { authType: "none", authActive: false },
@@ -249,19 +257,22 @@ export function runRESTRequest$(
     const finalEnvs = {
       requestVariables: finalRequestVariables as Environment["variables"],
       environments: envs.right,
+      collectionVariables: collection?.variables.filter((variable) => variable.active),
     }
-
+    console.log('finalenvs..'+JSON.stringify(finalEnvs,null,2))
     const finalEnvsWithNonEmptyValues = filterNonEmptyEnvironmentVariables(
       combineEnvVariables(finalEnvs)
     )
-    console.log("Combined finalEnvsWithNonEmptyValues Variables:.." + JSON.stringify(finalEnvsWithNonEmptyValues,null,2));
+    console.log(
+      "Combined finalEnvsWithNonEmptyValues Variables:.." +
+        JSON.stringify(finalEnvsWithNonEmptyValues, null, 2)
+    )
     const effectiveRequest = await getEffectiveRESTRequest(finalRequest, {
       id: "env-id",
       v: 1,
       name: "Env",
       variables: finalEnvsWithNonEmptyValues,
     })
-    console.log("effectiveRequest:.." + JSON.stringify(effectiveRequest,null,2));
 
     const [stream, cancelRun] =
       await createRESTNetworkRequestStream(effectiveRequest)
@@ -397,9 +408,9 @@ export function runTestRunnerRequest(
 ): Promise<
   | E.Left<"script_fail">
   | E.Right<{
-  response: HoppRESTResponse
-  testResult: HoppTestResult
-}>
+      response: HoppRESTResponse
+      testResult: HoppTestResult
+    }>
   | undefined
 > {
   return getFinalEnvsFromPreRequest(
