@@ -169,11 +169,8 @@ export function cascadeParentCollectionForHeaderAuth(
       })
     }
     // Update variables, overwriting duplicates by key
-    console.log('parentFolderVariables..'+JSON.stringify(parentFolderVariables,null,2))
     if (parentFolderVariables) {
       const activeVariables = parentFolderVariables.filter((v) => v.active)
-      console.log('activeVariables..'+JSON.stringify(activeVariables,null,2))
-
       activeVariables.forEach((variable) => {
         const index = variables.findIndex(
           (v) => v.inheritedVariable?.key === variable.key

@@ -246,7 +246,6 @@ export function runRESTRequest$(
       tab.value.document.inheritedProperties?.variables
         ?.map((variable) => variable.inheritedVariable)
         ?.filter((inheritedVariable) => inheritedVariable.active) ?? []
-    console.log('collection variables..'+JSON.stringify(collectionVariables,null,2))
     const finalRequest = {
       ...tab.value.document.request,
       auth: requestAuth ?? { authType: "none", authActive: false },
@@ -258,13 +257,8 @@ export function runRESTRequest$(
       environments: envs.right,
       collectionVariables: collectionVariables,
     }
-    console.log('finalenvs..'+JSON.stringify(finalEnvs,null,2))
     const finalEnvsWithNonEmptyValues = filterNonEmptyEnvironmentVariables(
       combineEnvVariables(finalEnvs)
-    )
-    console.log(
-      "Combined finalEnvsWithNonEmptyValues Variables:.." +
-        JSON.stringify(finalEnvsWithNonEmptyValues, null, 2)
     )
     const effectiveRequest = await getEffectiveRESTRequest(finalRequest, {
       id: "env-id",
