@@ -9,7 +9,7 @@ import V6_VERSION from "./v/6"
 import V7_VERSION from "./v/7"
 
 import { z } from "zod"
-import { translateToNewRequest } from "../rest"
+import {translateToNewRequest} from "../rest"
 import { translateToGQLRequest } from "../graphql"
 import { generateUniqueRefId } from "../utils/collection"
 
@@ -41,7 +41,8 @@ export const HoppCollection = createVersionedEntity({
 })
 
 export type HoppCollection = InferredEntity<typeof HoppCollection>
-
+export type HoppCollectionVariables =
+  HoppCollection["variables"][number]
 export const CollectionSchemaVersion = 7
 
 /**
@@ -78,7 +79,7 @@ export function translateToNewRESTCollection(x: any): HoppCollection {
     requests,
     auth,
     headers,
-    variables: [],
+    variables,
   })
 
   if (x.id) obj.id = x.id
@@ -108,7 +109,7 @@ export function translateToNewGQLCollection(x: any): HoppCollection {
     requests,
     auth,
     headers,
-    variables: [],
+    variables,
   })
 
   if (x.id) obj.id = x.id

@@ -402,7 +402,7 @@ const onAddRequest = ({ name, path }: { name: string; path: string }) => {
 
   const insertionIndex = saveGraphqlRequestAs(path, newRequest)
 
-  const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+  const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
     path,
     "graphql"
   )
@@ -418,6 +418,7 @@ const onAddRequest = ({ name, path }: { name: string; path: string }) => {
     inheritedProperties: {
       auth,
       headers,
+      variables
     },
   })
 
@@ -524,7 +525,7 @@ const selectRequest = ({
     folderPath: folderPath,
     requestIndex: requestIndex,
   })
-  const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+  const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
     folderPath,
     "graphql"
   )
@@ -544,6 +545,7 @@ const selectRequest = ({
     inheritedProperties: {
       auth,
       headers,
+      variables
     },
   })
 }
@@ -557,7 +559,7 @@ const dropRequest = ({
   requestIndex: number
   collectionIndex: number
 }) => {
-  const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+  const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
     `${collectionIndex}`,
     "graphql"
   )
@@ -579,6 +581,7 @@ const dropRequest = ({
     possibleTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
   }
 
@@ -610,7 +613,7 @@ const editProperties = ({
   let inheritedProperties = undefined
 
   if (parentIndex) {
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       parentIndex,
       "graphql"
     )
@@ -618,6 +621,7 @@ const editProperties = ({
     inheritedProperties = {
       auth,
       headers,
+      variables
     }
   }
 
@@ -647,7 +651,7 @@ const setCollectionProperties = (newCollection: {
     editGraphqlFolder(path, collection)
   }
 
-  const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+  const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
     path,
     "graphql"
   )
@@ -658,6 +662,7 @@ const setCollectionProperties = (newCollection: {
       {
         auth,
         headers,
+        variables
       },
       "graphql"
     )

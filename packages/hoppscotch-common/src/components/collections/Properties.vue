@@ -263,6 +263,7 @@ watch(
           authType: "inherit",
           authActive: false,
         },
+        variables: [],
       }
 
       await persistenceService.removeLocalConfig(

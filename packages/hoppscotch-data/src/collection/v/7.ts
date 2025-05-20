@@ -6,16 +6,16 @@ import { HoppRESTAuth } from "../../rest/v/12"
 
 import { V6_SCHEMA, v6_baseCollectionSchema } from "./6"
 
-export const HoppCollectionVariableSchema = z.object({
+export const HoppCollectionVariable = z.object({
   key: z.string(),
   value: z.string().optional(),
-  secret: z.boolean().default(false), // Always false for collection variables
+  active: z.boolean().default(true),
 });
 
 export const v7_baseCollectionSchema = v6_baseCollectionSchema.extend({
   v: z.literal(7),
   auth: z.union([HoppRESTAuth, HoppGQLAuth]),
-  variables: z.array(HoppCollectionVariableSchema),
+  variables: z.array(HoppCollectionVariable).default([]),
 })
 
 type Input = z.input<typeof v7_baseCollectionSchema> & {

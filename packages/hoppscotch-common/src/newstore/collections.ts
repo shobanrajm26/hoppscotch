@@ -1,6 +1,6 @@
 import {
   generateUniqueRefId,
-  HoppCollection,
+  HoppCollection, HoppCollectionVariables,
   HoppGQLAuth,
   HoppGQLRequest,
   HoppRESTAuth,
@@ -93,7 +93,7 @@ export function cascadeParentCollectionForHeaderAuth(
     },
   }
   const headers: HoppInheritedProperty["headers"] = []
-  const variables: Record<string, string> = {}
+  const variables: HoppInheritedProperty["variables"] = []
 
   if (!folderPath) return { auth, headers, variables }
 
@@ -109,7 +109,7 @@ export function cascadeParentCollectionForHeaderAuth(
   for (let i = 0; i < path.length; i++) {
     const parentFolder = navigateToFolderWithIndexPath(
       collectionStore.value.state,
-      path.slice(0, i + 1)
+      [...path.slice(0, i + 1)]
     )
 
     // Check if parentFolder is undefined or null
@@ -122,12 +122,23 @@ export function cascadeParentCollectionForHeaderAuth(
     const parentFolderHeaders = parentFolder.headers as
       | HoppRESTHeaders
       | GQLHeader[]
-    const parentFolderVariables = parentFolder.variables || []
+    const parentFolderVariables = parentFolder.variables as HoppCollectionVariables[]
 
-    // Cascade auth if not 'inherit'
+    // check if the parent folder has authType 'inherit' and if it is the root folder
+    if (
+      parentFolderAuth?.authType === "inherit" &&
+      [...path.slice(0, i + 1)].length === 1
+    ) {
+      auth = {
+        parentID: [...path.slice(0, i + 1)].join("/"),
+        parentName: parentFolder.name,
+        inheritedAuth: auth.inheritedAuth,
+      }
+    }
+
     if (parentFolderAuth?.authType !== "inherit") {
       auth = {
-        parentID: parentFolder._ref_id,
+        parentID: [...path.slice(0, i + 1)].join("/"),
         parentName: parentFolder.name,
         inheritedAuth: parentFolderAuth,
       }
@@ -137,39 +148,57 @@ export function cascadeParentCollectionForHeaderAuth(
     if (parentFolderHeaders) {
       const activeHeaders = parentFolderHeaders.filter((h) => h.active)
       activeHeaders.forEach((header) => {
-        const existingIndex = headers.findIndex((h) => h.key === header.key)
-        if (existingIndex !== -1) {
-          headers[existingIndex] = header
+        const index = headers.findIndex(
+          (h) => h.inheritedHeader?.key === header.key
+        )
+        const currentPath = [...path.slice(0, i + 1)].join("/")
+        if (index !== -1) {
+          // Replace the existing header with the same key
+          headers[index] = {
+            parentID: currentPath,
+            parentName: parentFolder.name,
+            inheritedHeader: header,
+          }
         } else {
-          headers.push(header)
+          headers.push({
+            parentID: currentPath,
+            parentName: parentFolder.name,
+            inheritedHeader: header,
+          })
         }
       })
     }
-
     // Update variables, overwriting duplicates by key
-    parentFolderVariables.forEach((variable) => {
-      variables[variable.key] = variable.value
-    })
+    console.log('parentFolderVariables..'+JSON.stringify(parentFolderVariables,null,2))
+    if (parentFolderVariables) {
+      const activeVariables = parentFolderVariables.filter((v) => v.active)
+      console.log('activeVariables..'+JSON.stringify(activeVariables,null,2))
+
+      activeVariables.forEach((variable) => {
+        const index = variables.findIndex(
+          (v) => v.inheritedVariable?.key === variable.key
+        )
+        const currentPath = [...path.slice(0, i + 1)].join("/")
+        if (index !== -1) {
+          // Replace the existing variable with the same key
+          variables[index] = {
+            parentID: currentPath,
+            parentName: parentFolder.name,
+            inheritedVariable: variable,
+          }
+        } else {
+          variables.push({
+            parentID: currentPath,
+            parentName: parentFolder.name,
+            inheritedVariable: variable,
+          })
+        }
+      })
+    }
   }
 
   return { auth, headers, variables }
 }
-
-// export function getActiveCollectionVariables(): { key: string; value: string }[] {
-//   const activeVariables: { key: string; value: string }[] = []
-//
-//   // Iterate through all collections in the store
-//   restCollectionStore.value.state.forEach((collection) => {
-//     const variables = collection.variables ?? [] // Default to an empty array if undefined
-//     variables
-//       .filter((variable) => variable.active) // Only include active variables
-//       .forEach((variable) => {
-//         activeVariables.push({ key: variable.key, value: variable.value })
-//       })
-//   })
-//
-//   return activeVariables
-// }
 
 function reorderItems(array: unknown[], from: number, to: number) {
   const item = array.splice(from, 1)[0]
@@ -1226,7 +1255,8 @@ function computeCollectionInheritedProps(
   ref_id: string,
   type: "my-collections" | "team-collections" = "my-collections",
   parentAuth: HoppRESTAuth | null = null,
-  parentHeaders: HoppRESTHeaders | null = null
+  parentHeaders: HoppRESTHeaders | null = null,
+  parentVariables: HoppCollectionVariables | null = null
 ): { auth: HoppRESTAuth; headers: HoppRESTHeaders } | null {
   // Determine the inherited authentication and headers
   const inheritedAuth =
@@ -1239,6 +1269,11 @@ function computeCollectionInheritedProps(
     ...collection.headers,
   ]
 
+  const inheritedVariables: HoppCollectionVariables = [
+    ...(parentVariables ?? []),
+    ...collection.variables,
+  ]
+
   // Check if the current collection matches the target reference ID
   const isTargetCollection =
     type === "my-collections"
@@ -1249,6 +1284,7 @@ function computeCollectionInheritedProps(
     return {
       auth: inheritedAuth,
       headers: inheritedHeaders,
+      variables: inheritedVariables,
     }
   }
 
@@ -1259,7 +1295,8 @@ function computeCollectionInheritedProps(
       ref_id,
       type,
       inheritedAuth,
-      inheritedHeaders
+      inheritedHeaders,
+      inheritedVariables,
     )
     if (result) return result // Return as soon as a match is found
   }

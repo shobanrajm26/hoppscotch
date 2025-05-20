@@ -318,7 +318,7 @@ export class CollectionsSpotlightSearcherService
 
         if (!req) return
 
-        const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+        const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
           folderPath.join("/"),
           "rest"
         )
@@ -336,6 +336,7 @@ export class CollectionsSpotlightSearcherService
             inheritedProperties: {
               auth,
               headers,
+              variables
             },
           },
           true
@@ -350,7 +351,7 @@ export class CollectionsSpotlightSearcherService
 
       if (!req) return
 
-      const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+      const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
         folderPath.join("/"),
         "graphql"
       )
@@ -366,6 +367,7 @@ export class CollectionsSpotlightSearcherService
         inheritedProperties: {
           auth,
           headers,
+          variables
         },
       })
     }

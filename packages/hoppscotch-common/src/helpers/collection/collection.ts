@@ -226,6 +226,13 @@ export function updateInheritedPropertiesForAffectedRequests(
 
       tab.value.document.inheritedProperties.headers = mergedHeaders
     }
+
+    if (tab.value.document.inheritedProperties?.variables) {
+      const inheritedVariables = inheritedProperties.variables.filter(
+        (variable) => variable.parentID === path
+      )
+      tab.value.document.inheritedProperties.variables = inheritedVariables
+    }
   })
 }
 

@@ -9,6 +9,7 @@ import {
   HoppRESTRequestResponse,
   HoppCollection,
   GlobalEnvironment,
+  HoppCollectionVariable,
 } from "@hoppscotch/data"
 import { entityReference } from "verzod"
 import { z } from "zod"
@@ -312,6 +313,13 @@ const HoppInheritedPropertySchema = z
         parentID: z.string(),
         parentName: z.string(),
         inheritedHeader: z.union([HoppRESTHeaders, GQLHeader]),
+      })
+    ),
+    variables: z.array(
+      z.object({
+        parentID: z.string(),
+        parentName: z.string(),
+        inheritedVariable: z.array(HoppCollectionVariable),
       })
     ),
   })

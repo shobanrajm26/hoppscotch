@@ -834,7 +834,7 @@ const onAddRequest = (requestName: string) => {
   if (collectionsType.value.type === "my-collections") {
     const insertionIndex = saveRESTRequestAs(path, newRequest)
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(path, "rest")
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(path, "rest")
 
     tabs.createNewTab({
       type: "request",
@@ -848,6 +848,7 @@ const onAddRequest = (requestName: string) => {
       inheritedProperties: {
         auth,
         headers,
+        variables,
       },
     })
 
@@ -1978,7 +1979,7 @@ const selectRequest = (selectedRequest: {
       })
     }
   } else {
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
       folderPath,
       "rest"
     )
@@ -2003,6 +2004,7 @@ const selectRequest = (selectedRequest: {
         inheritedProperties: {
           auth,
           headers,
+          variables,
         },
       })
     }
@@ -2101,7 +2103,7 @@ const dropRequest = (payload: {
   let possibleTab = null
 
   if (collectionsType.value.type === "my-collections") {
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       destinationCollectionIndex,
       "rest"
     )
@@ -2126,6 +2128,7 @@ const dropRequest = (payload: {
       possibleTab.value.document.inheritedProperties = {
         auth,
         headers,
+        variables,
       }
     }
 
@@ -2303,7 +2306,7 @@ const dropCollection = (payload: {
       `${destinationCollectionIndex}/${totalFoldersOfDestinationCollection}`
     )
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
       `${destinationCollectionIndex}/${totalFoldersOfDestinationCollection}`,
       "rest"
     )
@@ -2311,6 +2314,7 @@ const dropCollection = (payload: {
     const inheritedProperty = {
       auth,
       headers,
+      variables,
     }
 
     updateInheritedPropertiesForAffectedRequests(
@@ -2721,10 +2725,17 @@ const editProperties = (payload: {
           inheritedHeader: {},
         },
       ],
+      variables: [
+        {
+          parentID: "",
+          parentName: "",
+          inheritedVariable: {},
+        },
+      ],
     } as HoppInheritedProperty
 
     if (parentIndex) {
-      const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+      const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
         parentIndex,
         "rest"
       )
@@ -2732,6 +2743,7 @@ const editProperties = (payload: {
       inheritedProperties = {
         auth,
         headers,
+        variables,
       }
     }
 
@@ -2805,7 +2817,7 @@ const setCollectionProperties = (newCollection: {
       editRESTFolder(path, collection)
     }
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(path, "rest")
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(path, "rest")
 
     nextTick(() => {
       updateInheritedPropertiesForAffectedRequests(
@@ -2813,6 +2825,7 @@ const setCollectionProperties = (newCollection: {
         {
           auth,
           headers,
+          variables,
         },
         "rest"
       )

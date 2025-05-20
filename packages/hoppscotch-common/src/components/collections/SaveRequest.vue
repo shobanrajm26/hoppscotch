@@ -357,7 +357,7 @@ const saveRequestAs = async () => {
       },
     }
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
       `${picked.value.collectionIndex}`,
       "rest"
     )
@@ -365,6 +365,7 @@ const saveRequestAs = async () => {
     RESTTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     platform.analytics?.logEvent({
@@ -395,7 +396,7 @@ const saveRequestAs = async () => {
       },
     }
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers, variables } = cascadeParentCollectionForHeaderAuth(
       picked.value.folderPath,
       "rest"
     )
@@ -403,6 +404,7 @@ const saveRequestAs = async () => {
     RESTTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     platform.analytics?.logEvent({
@@ -434,7 +436,7 @@ const saveRequestAs = async () => {
       },
     }
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       picked.value.folderPath,
       "rest"
     )
@@ -442,6 +444,7 @@ const saveRequestAs = async () => {
     RESTTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     platform.analytics?.logEvent({
@@ -538,7 +541,7 @@ const saveRequestAs = async () => {
       workspaceType: "team",
     })
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       picked.value.folderPath,
       "graphql"
     )
@@ -546,6 +549,7 @@ const saveRequestAs = async () => {
     GQLTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     requestSaved("GQL")
@@ -573,7 +577,7 @@ const saveRequestAs = async () => {
       workspaceType: "team",
     })
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       picked.value.folderPath,
       "graphql"
     )
@@ -581,6 +585,7 @@ const saveRequestAs = async () => {
     GQLTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     requestSaved("GQL")
@@ -608,7 +613,7 @@ const saveRequestAs = async () => {
       workspaceType: "team",
     })
 
-    const { auth, headers } = cascadeParentCollectionForHeaderAuth(
+    const { auth, headers,variables } = cascadeParentCollectionForHeaderAuth(
       `${picked.value.collectionIndex}`,
       "graphql"
     )
@@ -616,6 +621,7 @@ const saveRequestAs = async () => {
     GQLTabs.currentActiveTab.value.document.inheritedProperties = {
       auth,
       headers,
+      variables
     }
 
     requestSaved("GQL")

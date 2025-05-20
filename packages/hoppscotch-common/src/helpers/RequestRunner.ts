@@ -241,13 +241,12 @@ export function runRESTRequest$(
           return []
         }
       )
-    console.log(
-      "tab parent.." + tab.value.document.inheritedProperties?.auth.parentID
-    )
-    const collection = getRESTCollectionByRefId(
-      tab.value.document.inheritedProperties?.auth.parentID
-    )
-    console.log(collection?.variables)
+
+    const collectionVariables =
+      tab.value.document.inheritedProperties?.variables
+        ?.map((variable) => variable.inheritedVariable)
+        ?.filter((inheritedVariable) => inheritedVariable.active) ?? []
+    console.log('collection variables..'+JSON.stringify(collectionVariables,null,2))
     const finalRequest = {
       ...tab.value.document.request,
       auth: requestAuth ?? { authType: "none", authActive: false },
@@ -257,7 +256,7 @@ export function runRESTRequest$(
     const finalEnvs = {
       requestVariables: finalRequestVariables as Environment["variables"],
       environments: envs.right,
-      collectionVariables: collection?.variables.filter((variable) => variable.active),
+      collectionVariables: collectionVariables,
     }
     console.log('finalenvs..'+JSON.stringify(finalEnvs,null,2))
     const finalEnvsWithNonEmptyValues = filterNonEmptyEnvironmentVariables(
