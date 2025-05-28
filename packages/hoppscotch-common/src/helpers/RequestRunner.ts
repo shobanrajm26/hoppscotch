@@ -1,5 +1,5 @@
 import {
-  Environment,
+  Environment, HoppCollectionVariables,
   HoppRESTHeaders,
   HoppRESTRequest,
   HoppRESTRequestVariable,
@@ -44,7 +44,6 @@ import {
   getTemporaryVariables,
   setTemporaryVariables,
 } from "./runner/temp_envs"
-import { getRESTCollectionByRefId } from "~/newstore/collections"
 
 const secretEnvironmentService = getService(SecretEnvironmentService)
 
@@ -246,6 +245,7 @@ export function runRESTRequest$(
       tab.value.document.inheritedProperties?.variables
         ?.map((variable) => variable.inheritedVariable)
         ?.filter((inheritedVariable) => inheritedVariable.active) ?? []
+
     const finalRequest = {
       ...tab.value.document.request,
       auth: requestAuth ?? { authType: "none", authActive: false },
@@ -397,7 +397,8 @@ function updateEnvsAfterTestScript(runResult: E.Right<SandboxTestResult>) {
 
 export function runTestRunnerRequest(
   request: HoppRESTRequest,
-  persistEnv = true
+  persistEnv = true,
+  collectionVariables?: HoppCollectionVariables[]
 ): Promise<
   | E.Left<"script_fail">
   | E.Right<{
@@ -414,7 +415,6 @@ export function runTestRunnerRequest(
       console.error(envs.left)
       return E.left("script_fail" as const)
     }
-
     const effectiveRequest = await getEffectiveRESTRequest(request, {
       id: "env-id",
       v: 1,
@@ -425,6 +425,9 @@ export function runTestRunnerRequest(
           temp: !persistEnv ? getTemporaryVariables() : [],
         },
         requestVariables: [],
+        collectionVariables: collectionVariables
+          ? collectionVariables.filter((variable) => variable.active)
+          : [],
       }),
     })
 

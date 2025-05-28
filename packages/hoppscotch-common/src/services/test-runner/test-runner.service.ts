@@ -59,6 +59,7 @@ export class TestRunnerService extends Service {
       headers: collection.headers,
       folders: [],
       requests: [],
+      variables: collection.variables,
     }
 
     this.runTestCollection(tab, collection, options)
@@ -270,7 +271,8 @@ export class TestRunnerService extends Service {
 
       const results = await runTestRunnerRequest(
         request,
-        options.keepVariableValues
+        options.keepVariableValues,
+        collection.variables,
       )
 
       if (options.stopRef?.value) {
